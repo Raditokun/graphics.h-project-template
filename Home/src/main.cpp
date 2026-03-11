@@ -3,6 +3,8 @@
 #include <time.h>
 #include <stdio.h>
 #include <vector>
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
 
 using namespace std;
 
@@ -30,6 +32,8 @@ private:
     
 
 public:
+
+
     
     Circle(const char* img ="") {
         radius = 25;
@@ -47,6 +51,8 @@ public:
     bool clicked(int mx, int my) {
         if (mx >= (x - radius) && mx <= (x + radius) &&
             my >= (y - radius) && my <= (y + radius)) {
+                PlaySound(TEXT("d:/RADIT Files/code/prolanvs/.vscode/Game/Home/media/faah.wav"), NULL, SND_FILENAME | SND_ASYNC);
+
             return true;
         }
         return false;
