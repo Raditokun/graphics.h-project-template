@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <vector>
 #include <mmsystem.h>
-#pragma comment(lib, "winmm.lib")
 
 using namespace std;
 
@@ -13,9 +12,9 @@ private:
     int mx, my, x, y;
 public:
 
-void sound(){
-    PlaySound(TEXT("media/faah.wav"), NULL, SND_FILENAME | SND_ASYNC);
-}
+    void sound(){
+        PlaySound(TEXT("../media/faaah.wav"), NULL, SND_FILENAME | SND_ASYNC);
+    }
 
     void update() {
 		mx = mousex();
