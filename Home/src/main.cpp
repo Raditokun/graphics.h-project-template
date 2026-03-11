@@ -3,6 +3,8 @@
 #include <time.h>
 #include <stdio.h>
 #include <vector>
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
 
 using namespace std;
 
@@ -10,6 +12,10 @@ class Mouse {
 private:
     int mx, my, x, y;
 public:
+
+void sound(){
+    PlaySound(TEXT("media/faah.wav"), NULL, SND_FILENAME | SND_ASYNC);
+}
 
     void update() {
 		mx = mousex();
@@ -113,7 +119,7 @@ int main() {
                 if (circles[i].clicked(mx, my)) {
                     circles[i].increaseStats();
                     totalClicks++;
-                    
+                    mouse.sound();
                     hit = true;
                     break; 
                 }
