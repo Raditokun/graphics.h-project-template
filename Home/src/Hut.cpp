@@ -15,8 +15,8 @@ int main()
     x = getmaxx(); // to get the co-ordinates i.e. x & y
     y = getmaxy();
     cleardevice();
-    line(200, 150, 350, 150);
-    line(140, 200, 200, 150);
+    line(200, 150, 350, 152);
+    line(140, 200, 200, 120);
     line(140, 330, 140, 200);
     line(250, 200, 140, 200);
     line(200, 150, 250, 200);
