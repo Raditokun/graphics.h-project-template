@@ -3,7 +3,7 @@
 ## Quick setup
 
 ```bash
-git clone https://github.com/kumarbaberval/graphics.h-project-template.git
+git clone https://github.com/Raditokun/graphics.h-project-template.git
 ```
 
 Detail setup can be found on my other repo [solution-to-graphics.h](https://github.com/kumarbaberval/Solution-to-graphics.h)
@@ -16,6 +16,7 @@ Detail setup can be found on my other repo [solution-to-graphics.h](https://gith
 └───Home
     ├───build
     └───src
+    └───media
 ```
 
 - Just `Ctrl+Shift+B` to run the build task you will get the executable file in build folder
@@ -25,5 +26,6 @@ Detail setup can be found on my other repo [solution-to-graphics.h](https://gith
 - Folder `src` contains source code
 
 - Folder `build` where compiler generate .exe
+- Folder `media` contains images and audi (images are .bmp only/// audio are .wav only)
 
 - .vscode contains c_cpp_properties.json and task require modification according to your environment and types compiler
