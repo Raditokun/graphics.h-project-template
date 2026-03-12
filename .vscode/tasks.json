@@ -7,6 +7,7 @@
       "command": "C:\\MinGW\\bin\\g++.exe",
       "args": [
         "-g",
+        "-I${workspaceFolder}\\Home\\include",
         "${file}",
         "-o",
         //  "${fileDirname}\\${fileBasenameNoExtension}.exe",

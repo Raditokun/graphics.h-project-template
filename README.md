@@ -1,12 +1,7 @@
-# Graphics library setup 
+# 🚀 Game Progress ✅
 
-## Quick setup
-
-```bash
-git clone https://github.com/Raditokun/graphics.h-project-template.git
-```
-
-Detail setup can be found on my other repo [solution-to-graphics.h](https://github.com/kumarbaberval/Solution-to-graphics.h)
+1.  [✅] Initialize main game window and rendering context
+2.  [] Sprite
 
 ## My directory look like
 

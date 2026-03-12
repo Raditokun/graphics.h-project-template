@@ -4,153 +4,225 @@
 #include <stdio.h>
 #include <vector>
 #include <mmsystem.h>
+#include "D:/RADIT Files/code/prolanvs/.vscode/Game/include/SpriteLoader.h"
 #pragma comment(lib, "winmm.lib")
 
 
 using namespace std;
 
-class Mouse {
-private:        
-    int mx, my, x, y;
-public:
-
-    void update() {
-		mx = mousex();
-        my = mousey();
-
-    }
-    void chrosshair() {
-        setcolor(WHITE);
-        line(mx - 10, my, mx + 10, my);
-        line(mx, my - 10, mx, my + 10);
-    }
-
+enum SpriteType {
+    STATIC,      // Non-moving sprite (objects, NPCs, etc)
+    DYNAMIC      // Moving sprite (player, enemies, etc)
 };
 
-class Circle {
-private:
-    int x, y, radius, clickCount, speed, color, dx, dy;
+class Sprite{
+    vector<void*> frames;
+    int currentFrame;
+    int x, y;
+    int frameWidth, frameHeight;
+    SpriteType type;
+    int animationCounter;
+    int animationSpeed;
+    int velocityX, velocityY;
+    string spriteID;
     
-
 public:
-
-
-
-
-
-    
-    Circle() {
-        radius = 25;
-        clickCount = 0;
-        speed = 1; 
-		color = (rand() % 15) + 1; //ngerandom color
-       
-
-        x = rand() % (1280 - radius * 2) + radius;
-        y = rand() % (720 - radius * 2) + radius;
-
-        direction();
+    Sprite(const string &filepath, int numFrames, int startX, int startY, 
+           const string &id, SpriteType spriteType = DYNAMIC, int animSpeed = 10)
+        : currentFrame(0), x(startX), y(startY), type(spriteType), 
+          animationCounter(0), animationSpeed(animSpeed), velocityX(0), velocityY(0), spriteID(id)
+    {
+        SpriteLoader loader;
+        frames = loader.LoadStrip(filepath, numFrames);
+        frameWidth = loader.GetFrameW();
+        frameHeight = loader.GetFrameH();
     }
-
-    bool clicked(int mx, int my) {
-        if (mx >= (x - radius) && mx <= (x + radius) &&
-            my >= (y - radius) && my <= (y + radius)) {
-                PlaySound(TEXT("D:/Code/ProlanVScode/Home/media/faaah.wav"), NULL, SND_FILENAME | SND_ASYNC);
-
-            return true;
+    
+    void Draw()
+    {
+        if(!frames.empty()){
+            putimage(x, y, frames[currentFrame], COPY_PUT);
         }
-        return false;
     }
-
-    void draw() {
-        setfillstyle(SOLID_FILL, color);
-        setcolor(WHITE);
-        fillellipse(x, y, radius, radius);
-    }
-
-    void direction() {
-        do {
-            dx = (rand() % 3) - 1;
-            dy = (rand() % 3) - 1;
-        } while (dx == 0 && dy == 0);
-    }
-
-    void move() {
-        x = x + speed * dx;
-        y = y + speed * dy;
-
+    
+    void Update()
+    {
+        // Update position if dynamic
+        if(type == DYNAMIC)
+        {
+            x += velocityX;
+            y += velocityY;
+            
+            // Clamp to screen bounds
+            if(x < 0) x = 0;
+            if(x + frameWidth > 1280) x = 1280 - frameWidth;
+            if(y < 0) y = 0;
+            if(y + frameHeight > 720) y = 720 - frameHeight;
+        }
         
-        if (x > 1280) x = 0;
-        if (x < 0) x = 1280;
-        if (y > 720) y = 0;
-        if (y < 0) y = 720;
+        // Update animation
+        animationCounter++;
+        if(animationCounter >= animationSpeed)
+        {
+            currentFrame = (currentFrame + 1) % frames.size();
+            animationCounter = 0;
+        }
     }
+    
+    void SetPosition(int newX, int newY)
+    {
+        x = newX;
+        y = newY;
+    }
+    
+    void SetVelocity(int vx, int vy)
+    {
+        velocityX = vx;
+        velocityY = vy;
+    }
+    
+    int GetX() const { return x; }
+    int GetY() const { return y; }
+    int GetWidth() const { return frameWidth; }
+    int GetHeight() const { return frameHeight; }
+    string GetID() const { return spriteID; }
+    SpriteType GetType() const { return type; }
+    
+    // Simple AABB collision detection
+    bool IsCollidingWith(const Sprite &other) const
+    {
+        return !(x + frameWidth < other.GetX() || 
+                 x > other.GetX() + other.GetWidth() ||
+                 y + frameHeight < other.GetY() || 
+                 y > other.GetY() + other.GetHeight());
+    }
+    
+    ~Sprite()
+    {
+        SpriteLoader::Free(frames);
+    }
+};
 
-    void increaseStats() {
-        clickCount++;
-        speed++;
-        x = rand() % (1280 - radius * 2) + radius;
-        y = rand() % (720 - radius * 2) + radius;
-		direction();
+class SpriteManager {
+    vector<Sprite*> sprites;
+    
+public:
+    void AddSprite(Sprite* sprite)
+    {
+        sprites.push_back(sprite);
+    }
+    
+    void RemoveSprite(const string &id)
+    {
+        for(auto it = sprites.begin(); it != sprites.end(); ++it)
+        {
+            if((*it)->GetID() == id)
+            {
+                delete *it;
+                sprites.erase(it);
+                break;
+            }
+        }
+    }
+    
+    Sprite* GetSprite(const string &id)
+    {
+        for(auto sprite : sprites)
+        {
+            if(sprite->GetID() == id)
+                return sprite;
+        }
+        return nullptr;
+    }
+    
+    void UpdateAll()
+    {
+        for(auto sprite : sprites)
+            sprite->Update();
+    }
+    
+    void DrawAll()
+    {
+        for(auto sprite : sprites)
+            sprite->Draw();
+    }
+    
+    void CheckCollisions(const string &dynamicSpriteID)
+    {
+        Sprite* player = GetSprite(dynamicSpriteID);
+        if(!player) return;
+        
+        for(auto sprite : sprites)
+        {
+            if(sprite->GetID() != dynamicSpriteID && player->IsCollidingWith(*sprite))
+            {
+                // Handle collision
+                printf("Collision detected with: %s\n", sprite->GetID().c_str());
+            }
+        }
+    }
+    
+    ~SpriteManager()
+    {
+        for(auto sprite : sprites)
+            delete sprite;
+        sprites.clear();
     }
 };
 
 
-int main() {
- 
-    initwindow(1280, 720, "ditotototototoototototototot");
-    srand(time(0));
+int main(){
 
-    vector<Circle> circles;
-    circles.push_back(Circle());
-	Mouse mouse;
-
-    int totalClicks = 0;
-
-
-    while (!kbhit()) {
+    initwindow(1280, 720, "Save My Wife");
+    
+    SpriteManager manager;
+    
+    // Add player sprite (moving)
+    manager.AddSprite(new Sprite("./media/down.bmp", 4, 640, 360, "player", DYNAMIC, 10));
+    
+    // Add static sprites (NPCs, objects, etc)
+    manager.AddSprite(new Sprite("./media/down.bmp", 4, 200, 200, "npc1", STATIC, 15));
+    manager.AddSprite(new Sprite("./media/down.bmp", 4, 1000, 500, "npc2", STATIC, 15));
+    
+    int playerSpeed = 10;
+    
+    while(true)
+    {
         cleardevice();
-
-        mouse.update();
-
-        if (ismouseclick(WM_LBUTTONDOWN)) {
-            int mx, my;
-            getmouseclick(WM_LBUTTONDOWN, mx, my);
-
-            bool hit = false;
-
-            for (int i = 0; i < circles.size(); i++) {
-                if (circles[i].clicked(mx, my)) {
-                    circles[i].increaseStats();
-                    totalClicks++;
-                    
-                    hit = true;
-                    break; 
-                }
-            }
-
-            if (hit) {
-                circles.push_back(Circle());
-            }
-        }
-
         
-        for (int i = 0; i < circles.size(); i++) {
-            circles[i].move();
-            circles[i].draw();
+        // Update all sprites
+        manager.UpdateAll();
+        
+        // Draw all sprites
+        manager.DrawAll();
+        
+        // Check collisions with player
+        manager.CheckCollisions("player");
+        
+        // Handle input
+        if(kbhit())
+        {
+            char key = getch();
+            Sprite* player = manager.GetSprite("player");
+            
+            if(key == 'w')
+                player->SetVelocity(0, -playerSpeed);
+            else if(key == 's')
+                player->SetVelocity(0, playerSpeed);
+            else if(key == 'a')
+                player->SetVelocity(-playerSpeed, 0);
+            else if(key == 'd')
+                player->SetVelocity(playerSpeed, 0);
+            else if(key == ' ')
+                player->SetVelocity(0, 0); // Stop moving
+            else if(key == 'q') 
+                break;
         }
-
-		mouse.chrosshair();
-
-        setcolor(WHITE);
-        settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
-        char scoreText[50];
-        sprintf(scoreText, "score: %d", totalClicks);
-        outtextxy(10, 10, scoreText);
-
-        delay(25);
+        
+        delay(30);
     }
-
-    getch();
+    
+    closegraph();
     return 0;
+
 }
