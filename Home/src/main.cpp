@@ -3,16 +3,14 @@
 #include <time.h>
 #include <stdio.h>
 #include <vector>
-<<<<<<< HEAD
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
-=======
->>>>>>> origin/main
+
 
 using namespace std;
 
 class Mouse {
-private:
+private:        
     int mx, my, x, y;
 public:
 
@@ -35,13 +33,13 @@ private:
     
 
 public:
-<<<<<<< HEAD
 
 
-=======
->>>>>>> origin/main
+
+
+
     
-    Circle(const char* img ="") {
+    Circle() {
         radius = 25;
         clickCount = 0;
         speed = 1; 
@@ -57,11 +55,8 @@ public:
     bool clicked(int mx, int my) {
         if (mx >= (x - radius) && mx <= (x + radius) &&
             my >= (y - radius) && my <= (y + radius)) {
-<<<<<<< HEAD
-                PlaySound(TEXT("d:/RADIT Files/code/prolanvs/.vscode/Game/Home/media/faah.wav"), NULL, SND_FILENAME | SND_ASYNC);
+                PlaySound(TEXT("D:/Code/ProlanVScode/Home/media/faaah.wav"), NULL, SND_FILENAME | SND_ASYNC);
 
-=======
->>>>>>> origin/main
             return true;
         }
         return false;
